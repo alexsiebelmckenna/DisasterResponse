@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import pickle
 import sqlite3
@@ -22,49 +21,46 @@ version='0.24.0'
 main(['install', '{0}=={1}'.format(pkg, version)])
 
 def load_data(database_filepath):
-    
-    #con = sqlite3.connect(database_filepath)
+
+    con = sqlite3.connect(database_filepath)
     #cursor = con.cursor()
-    
+
     #cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
     #print(cursor.fetchall())
 
-    engine = create_engine('sqlite:///{}'.format(database_filepath))
-    df = pd.read_sql_table(database_filepath, engine)
+    engine = create_engine(f'sqlite:///{database_filepath}')
+    df = pd.read_sql_table("DisasterResponse.db",engine)
     # drop id col
     df.drop('id', axis=1, inplace=True)
     df['genre'] = df['genre'].astype('category')
-    
+
     # extract values from X and y
     X = df[['message', 'genre']]
     Y = df.iloc[:, 3:]
 
     category_names = list(df.columns[3:])
-   
+
     return X, Y, category_names
-    
+
 def tokenize(text):
     # normalize text
     text = text.lower()
-    
+
     # Remove punctuation characters
-    text = re.sub(r'[^(a-z)(A-Z)(0-9]', ' ', text) 
-    
+    text = re.sub(r'[^(a-z)(A-Z)(0-9]', ' ', text)
+
     word_split = word_tokenize(text)
 
     # Remove stop words
     stop_words = set(stopwords.words("english"))
     word_split = [word for word in word_split if word not in stop_words]
-    
+
     # POS tagging
     tagged_tokens = pos_tag(word_split)
     return tagged_tokens
 
 def build_model():
     # build preprocessing pipeline
-    
-    categorical_features = 
-    
     preprocessor = ColumnTransformer(transformers=[
         # for text data
         ('tfidf_vec', TfidfVectorizer(tokenizer=tokenize),
@@ -72,7 +68,7 @@ def build_model():
         # for categorical data
         ('onehot_vec', OneHotEncoder(), selector(dtype_include='category'))
     ])
-    
+
     # append classifier
     # build full prediction pipeline
     model = Pipeline(steps=[
@@ -80,7 +76,7 @@ def build_model():
         # classifier
         ('clf', MultiOutputClassifier(KNeighborsClassifier()))
     ])
-    
+
     return model
 
 def evaluate_model(model, X_test, Y_test, category_names):
@@ -98,13 +94,13 @@ def main():
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
         X, Y, category_names = load_data(database_filepath)
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
-        
+
         print('Building model...')
         model = build_model()
-        
+
         print('Training model...')
         model.fit(X_train, Y_train)
-        
+
         print('Evaluating model...')
         evaluate_model(model, X_test, Y_test, category_names)
 

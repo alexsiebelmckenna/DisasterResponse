@@ -1,6 +1,5 @@
 import sys
 import pandas as pd
-import numpy as np
 import matplotlib as plt
 from sqlalchemy import create_engine
 
@@ -35,7 +34,7 @@ def clean_data(df):
 
 def save_data(df, database_filename):
     engine = create_engine('sqlite:///'+database_filename)
-    df.to_sql(database_filename, engine, index=False)  
+    df.to_sql(database_filename, engine, index=False)
 
 
 def main():
@@ -49,12 +48,12 @@ def main():
 
         print('Cleaning data...')
         df = clean_data(df)
-        
+
         print('Saving data...\n    DATABASE: {}'.format(database_filepath))
         save_data(df, database_filepath)
-        
+
         print('Cleaned data saved to database!')
-    
+
     else:
         print('Please provide the filepaths of the messages and categories '\
               'datasets as the first and second argument respectively, as '\
