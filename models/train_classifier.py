@@ -1,5 +1,10 @@
+import nltk
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('averaged_perceptron_tagger')
 import pandas as pd
 import pickle
+import re
 import sqlite3
 import sys
 from pip._internal import main
@@ -14,6 +19,9 @@ from sklearn.compose import make_column_selector as selector
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.metrics import multilabel_confusion_matrix
 from sqlalchemy import create_engine
+from nltk import word_tokenize, pos_tag
+from nltk.corpus import stopwords
+
 
 # Make sure requisite packages are installed:
 pkg='scikit-learn'
@@ -60,13 +68,15 @@ def tokenize(text):
     return tagged_tokens
 
 def build_model():
+
     # build preprocessing pipeline
     preprocessor = ColumnTransformer(transformers=[
         # for text data
         ('tfidf_vec', TfidfVectorizer(tokenizer=tokenize),
-         selector(dtype_exclude='category')),
+         'message'),
         # for categorical data
-        ('onehot_vec', OneHotEncoder(), selector(dtype_include='category'))
+        ('onehot_vec', OneHotEncoder(),
+        'genre'),
     ])
 
     # append classifier
@@ -74,7 +84,7 @@ def build_model():
     model = Pipeline(steps=[
         ('preprocessor', preprocessor),
         # classifier
-        ('clf', MultiOutputClassifier(KNeighborsClassifier()))
+        ('clf', MultiOutputClassifier(KNeighborsClassifier())),
     ])
 
     return model
