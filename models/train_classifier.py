@@ -73,10 +73,12 @@ def build_model():
     preprocessor = ColumnTransformer(transformers=[
         # for text data
         ('tfidf_vec', TfidfVectorizer(tokenizer=tokenize),
-         'message'),
+         'message')
+         #TODO: Figure out how to incorporate 'genre' categorical column
+
         # for categorical data
-        ('onehot_vec', OneHotEncoder(),
-        'genre'),
+        #('onehot_vec', OneHotEncoder(),
+        #'genre')
     ])
 
     # append classifier
@@ -84,7 +86,7 @@ def build_model():
     model = Pipeline(steps=[
         ('preprocessor', preprocessor),
         # classifier
-        ('clf', MultiOutputClassifier(KNeighborsClassifier())),
+        ('clf', MultiOutputClassifier(KNeighborsClassifier()))
     ])
 
     return model
@@ -95,7 +97,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
-    pickle.dump(model, model_filepath)
+    pickle.dump(model, open(model_filepath, 'wb'))
 
 
 def main():
