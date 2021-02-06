@@ -15,22 +15,28 @@ from sqlalchemy import create_engine
 app = Flask(__name__)
 
 def tokenize(text):
-    tokens = word_tokenize(text)
-    lemmatizer = WordNetLemmatizer()
+    # normalize text
+    text = text.lower()
 
-    clean_tokens = []
-    for tok in tokens:
-        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
-        clean_tokens.append(clean_tok)
+    # Remove punctuation characters
+    text = re.sub(r'[^(a-z)(A-Z)(0-9]', ' ', text)
 
-    return clean_tokens
+    word_split = word_tokenize(text)
+
+    # Remove stop words
+    stop_words = set(stopwords.words("english"))
+    word_split = [word for word in word_split if word not in stop_words]
+
+    # POS tagging
+    tagged_tokens = pos_tag(word_split)
+    return tagged_tokens
 
 # load data
-engine = create_engine('sqlite:///../data/YourDatabaseName.db')
-df = pd.read_sql_table('YourTableName', engine)
+engine = create_engine('sqlite:///data/DisasterResponse.db')
+df = pd.read_sql_table('DisasterResponse.db', engine)
 
 # load model
-model = joblib.load("../models/your_model_name.pkl")
+model = joblib.load("models/classifier.pkl")
 
 
 # index webpage displays cool visuals and receives user input text for model
