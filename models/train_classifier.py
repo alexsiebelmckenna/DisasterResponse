@@ -32,9 +32,6 @@ from nltk import word_tokenize, pos_tag
 from nltk.corpus import stopwords
 from sklearn.utils import parallel_backend
 
-
-
-
 # Make sure requisite packages are installed:
 pkg='scikit-learn'
 version='0.24.1'
@@ -91,35 +88,20 @@ def build_model():
         # for text data
         ('tfidf_vec', TfidfVectorizer(tokenizer=tokenize),
          'message'),
-         #TODO: Figure out how to incorporate 'genre' categorical column
         # for categorical data
         ('onehot_vec', OneHotEncoder(handle_unknown='ignore'), ['genre'])
     ])
 
-    # append classifier
-    # build full prediction pipeline
+    # build full prediction pipeline by appending classifier to preprocessor
     pipeline = Pipeline(steps=[
         ('preprocessor', preprocessor),
         # classifier
         ('clf', MultiOutputClassifier(AdaBoostClassifier(DecisionTreeClassifier())))
     ])
 
-    #n_estimators = [int(x) for x in np.linspace(start = 200, stop = 2000, num = 10)]
-    # Number of features to consider at every split
-    #max_features = ['auto', 'sqrt']
-    # Maximum number of levels in tree
-    #max_depth = [int(x) for x in np.linspace(10, 110, num = 11)]
-    #max_depth.append(None)
-    # Minimum number of samples required to split a node
-    #min_samples_split = [2, 5, 10]
-    # Minimum number of samples required at each leaf node
-    #min_samples_leaf = [1, 2, 4]
-    # Method of selecting samples for training each tree
-    #bootstrap = [True, False]
-
     param_grid = {'clf__estimator__n_estimators': (5 ,10)}
 
-    cv = GridSearchCV(pipeline, param_grid, cv=2, n_jobs=-1, verbose=2)
+    cv = GridSearchCV(pipeline, param_grid, cv=2, n_jobs=4, verbose=2)
 
     return cv
 
