@@ -5,6 +5,7 @@ import pdb
 import nltk
 import pickle
 import os
+import plotly.express as px
 
 from nltk.stem import WordNetLemmatizer
 from nltk import word_tokenize, pos_tag
@@ -13,6 +14,7 @@ nltk.download('stopwords')
 nltk.download('averaged_perceptron_tagger')
 
 import re
+import string
 import sqlite3
 import sys
 import time
@@ -63,6 +65,21 @@ def tokenize(text):
     tagged_tokens = pos_tag(word_split)
     return tagged_tokens
 
+def mini_tokenize(text):
+    # normalize text
+    text = text.lower()
+
+    # Remove punctuation characters
+    text = re.sub(r'[^(a-z)(A-Z)(0-9]', ' ', text)
+
+    word_split = word_tokenize(text)
+
+    # Remove stop words
+    stop_words = set(stopwords.words("english"))
+    word_split = [word for word in word_split if word not in stop_words]
+
+    return word_split
+
 preprocessor = ColumnTransformer(transformers=[
     # for text data
     ('tfidf_vec', TfidfVectorizer(tokenizer=tokenize),
@@ -78,6 +95,10 @@ X = df[['message', 'genre']]
 Y = df.drop(columns=['id', 'message', 'original', 'genre'])
 # load model
 model = joblib.load("models/classifier.pkl")
+
+tokenized = df['message'].apply(lambda x: mini_tokenize(x))
+
+# set here to explore data further (un-comment as necessary):
 #import pdb; pdb.set_trace()
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
@@ -85,12 +106,16 @@ model = joblib.load("models/classifier.pkl")
 def index():
 
     # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
 
+    df_wordcount = df['message'].map(len)
+    df_wordcount_genre = pd.concat([df['genre'], df_wordcount], axis=1)
+    df_wordcount_genre_mean = df_wordcount_genre.groupby('genre').mean()
+    df_wordcount_genre_mean.rename(columns={'message':'length'}, inplace=True)
+    df_wordcount_genre_mean.reset_index(level=0, inplace=True)
+
     # create visuals
-    # TODO: Below is an example - modify to create your own visuals
     graphs = [
         {
             'data': [
@@ -109,6 +134,28 @@ def index():
                     'title': "Genre"
                 }
             }
+        },
+        {
+            'data': [
+                Bar(
+                x=df_wordcount_genre_mean['genre'],
+                y=df_wordcount_genre_mean['length']
+                )
+            ],
+
+            'layout': {
+                'title': 'Average Message Length by Genre',
+                'yaxis': {
+                    'title': "Average Message Length"
+                },
+                'xaxis': {
+                    'title': "Genre"
+                }
+            }
+
+
+
+
         }
     ]
 
@@ -124,19 +171,19 @@ def index():
 @app.route('/go')
 def go():
     # save user input in query
-    message_query = request.args.get('message') #np.reshape here?
+    message_query = request.args.get('message')
 
     # save user input in genre
     genre_query = request.args.get('genre')
 
-    df_query = pd.DataFrame(columns=['message', 'genre'], index=range(0,1)).assign(message=message_query, genre=genre_query)
-
+    df_query = (pd.DataFrame(columns=['message', 'genre'], index=range(0,1))\
+                    .assign(message=message_query, genre=genre_query))
 
     # use model to predict classification for query
     classification_labels = model.predict(df_query)[0]
     classification_results = dict(zip(df.columns[4:], classification_labels))
 
-    # This will render the go.html Please see that file.
+    # This will render the go.html. Please see that file.
     return render_template(
         'go.html',
         message=message_query,
@@ -144,10 +191,8 @@ def go():
         classification_result=classification_results
     )
 
-
 def main():
     app.run(host='0.0.0.0', port=3001, debug=True)
-
 
 if __name__ == '__main__':
     main()
