@@ -1,5 +1,7 @@
 # Disaster Response Pipeline Project
 
+This pipeline categorizes messages sent during disasters into one of 36 categories to enable more efficient disaster response processes on the ground.
+
 ### Instructions:
 1. Run the following commands in the project's root directory to set up your database and model.
 
@@ -12,3 +14,5 @@
     `python run.py`
 
 3. Go to http://0.0.0.0:3001/
+
+4. Enter your message, followed by which of the 3 broader categories best describes your message. This is used by the ML model to categorize your message. Click "Classify Message".
