@@ -146,7 +146,7 @@ def index():
             'layout': {
                 'title': 'Average Message Length by Genre',
                 'yaxis': {
-                    'title': "Average Message Length"
+                    'title': "Average Message Length (Characters)"
                 },
                 'xaxis': {
                     'title': "Genre"
