@@ -49,6 +49,20 @@ from sklearn.compose import ColumnTransformer
 app = Flask(__name__)
 
 def tokenize(text):
+    """"
+    Tokenization function for use in TfidfVectorizer in build_model()
+    1. Normalizes text (converts to lowercase)
+    2. Removes punctuation
+    3. Removes stop_words
+    4. Splits sentence into words (tokens)
+    5. Performs POS tagging
+
+    Parameters:
+    text: string to be tokenized
+
+    Returns:
+    tagged_tokens: POS-tagged tokens
+    """
     # normalize text
     text = text.lower()
 
@@ -65,21 +79,6 @@ def tokenize(text):
     tagged_tokens = pos_tag(word_split)
     return tagged_tokens
 
-def mini_tokenize(text):
-    # normalize text
-    text = text.lower()
-
-    # Remove punctuation characters
-    text = re.sub(r'[^(a-z)(A-Z)(0-9]', ' ', text)
-
-    word_split = word_tokenize(text)
-
-    # Remove stop words
-    stop_words = set(stopwords.words("english"))
-    word_split = [word for word in word_split if word not in stop_words]
-
-    return word_split
-
 preprocessor = ColumnTransformer(transformers=[
     # for text data
     ('tfidf_vec', TfidfVectorizer(tokenizer=tokenize),
@@ -88,15 +87,13 @@ preprocessor = ColumnTransformer(transformers=[
     ('onehot_vec', OneHotEncoder(handle_unknown='ignore'), ['genre'])])
 
 # load data
-engine = create_engine('sqlite:///data/DisasterResponse.db')
+engine = create_engine('sqlite:///../data/DisasterResponse.db')
 df = pd.read_sql_table('DisasterResponse.db', engine)
 
 X = df[['message', 'genre']]
 Y = df.drop(columns=['id', 'message', 'original', 'genre'])
 # load model
-model = joblib.load("models/classifier.pkl")
-
-tokenized = df['message'].apply(lambda x: mini_tokenize(x))
+model = joblib.load("../models/classifier.pkl")
 
 # set here to explore data further (un-comment as necessary):
 #import pdb; pdb.set_trace()
