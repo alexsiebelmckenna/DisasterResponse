@@ -87,13 +87,14 @@ preprocessor = ColumnTransformer(transformers=[
     ('onehot_vec', OneHotEncoder(handle_unknown='ignore'), ['genre'])])
 
 # load data
-engine = create_engine('sqlite:///../data/DisasterResponse.db')
+database_filepath = "data/DisasterResponse.db"
+engine = create_engine(f'sqlite:///{database_filepath}')
 df = pd.read_sql_table('DisasterResponse.db', engine)
 
 X = df[['message', 'genre']]
 Y = df.drop(columns=['id', 'message', 'original', 'genre'])
 # load model
-model = joblib.load("../models/classifier.pkl")
+model = joblib.load("models/classifier.pkl")
 
 # set here to explore data further (un-comment as necessary):
 #import pdb; pdb.set_trace()
