@@ -49,9 +49,9 @@ Your message will be classified according to at least one of 36 categories, as d
 
 ### Description of files
 
-process_data.py: preprocessing data
-train_classifier.py: trains and saves classifier
-run.py: runs web app
+1. process_data.py: preprocessing data
+2. train_classifier.py: trains and saves classifier
+3. run.py: runs web app
 
 ### Acknowledgements
 
