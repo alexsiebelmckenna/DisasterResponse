@@ -44,8 +44,8 @@ This pipeline categorizes messages sent during disasters into one of 36 categori
 ### Summary of results
 
 Your message will be classified according to at least one of 36 categories, as displayed below:
-![Results](file:///Users/alexsiebelmckenna/Desktop/DR_results.png)
 
+<img width="1429" alt="DR_results" src="https://user-images.githubusercontent.com/48768390/114258410-270b2100-997b-11eb-9e03-02dcc7b1cc03.png">
 
 ### Description of files
 
